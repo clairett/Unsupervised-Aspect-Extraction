@@ -2,12 +2,15 @@ from sklearn.feature_extraction.text import CountVectorizer
 from nltk.corpus import stopwords
 from nltk.stem.wordnet import WordNetLemmatizer
 import codecs
+import os
+import csv
+
 
 def parseSentence(line):
     lmtzr = WordNetLemmatizer()    
     stop = stopwords.words('english')
     text_token = CountVectorizer().build_tokenizer()(line.lower())
-    text_rmstop = [i for i in text_token if i not in stop]
+    text_rmstop = [i.decode('cp1252') for i in text_token if i not in stop]
     text_stem = [lmtzr.lemmatize(w) for w in text_rmstop]
     return text_stem
 
@@ -38,14 +41,37 @@ def preprocess_test(domain):
             out1.write(' '.join(tokens) + '\n')
             out2.write(label+'\n')
 
+def preprocess_csv(domain):
+    f = open('../dataset/'+domain+'.csv', 'r')
+    if not os.path.exists('../preprocessed_data/' + domain):
+        os.mkdir('../preprocessed_data/' + domain)
+    out = codecs.open('../preprocessed_data/' + domain + '/train.txt', 'w', 'utf-8')
+    sentences = []
+    spamreader = csv.DictReader(f)
+    count = 1
+    for row in spamreader:
+        if count > 2:
+            if row['Q2'] != "":
+                tokens = parseSentence(row['Q2'])
+                if len(tokens) > 0:
+                    sentences.append(' '.join(tokens))
+
+        count += 1
+    out.write('\n'.join(sentences))
+
 def preprocess(domain):
-    print '\t'+domain+' train set ...'
-    preprocess_train(domain)
-    print '\t'+domain+' test set ...'
-    preprocess_test(domain)
+    print '\t' + domain + ' set ...'
+    preprocess_csv(domain)
+    # print '\t'+domain+' train set ...'
+    # preprocess_train(domain)
+    # print '\t'+domain+' test set ...'
+    # preprocess_test(domain)
+
+
 
 print 'Preprocessing raw review sentences ...'
-preprocess('restaurant')
-preprocess('beer')
+# preprocess('restaurant')
+# preprocess('beer')
+preprocess('mobile')
 
 

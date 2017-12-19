@@ -19,8 +19,7 @@ def main(domain):
 
 
 print 'Pre-training word embeddings ...'
-main('restaurant')
-main('beer')
+main('mobile')
 
 
 

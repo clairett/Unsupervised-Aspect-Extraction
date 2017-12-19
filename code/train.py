@@ -37,7 +37,7 @@ U.mkdir_p(out_dir)
 U.print_args(args)
 
 assert args.algorithm in {'rmsprop', 'sgd', 'adagrad', 'adadelta', 'adam', 'adamax'}
-assert args.domain in {'restaurant', 'beer'}
+# assert args.domain in {'restaurant', 'beer'}
 
 if args.seed > 0:
     np.random.seed(args.seed)
@@ -55,8 +55,8 @@ train_x = sequence.pad_sequences(train_x, maxlen=overall_maxlen)
 test_x = sequence.pad_sequences(test_x, maxlen=overall_maxlen)
 
 # train_x = train_x[0:30000]
-print 'Number of training examples: ', len(train_x)
-print 'Length of vocab: ', len(vocab)
+print('Number of training examples: ' + str(len(train_x)))
+print('Length of vocab: ' + str(len(vocab)))
 
 def sentence_batch_generator(data, batch_size):
     n_batch = len(data) / batch_size
@@ -157,8 +157,8 @@ for ii in xrange(args.epochs):
             sims = word_emb.dot(desc.T)
             ordered_words = np.argsort(sims)[::-1]
             desc_list = [vocab_inv[w] for w in ordered_words[:100]]
-            print 'Aspect %d:' % ind
-            print desc_list
+            print('Aspect %d:' % ind)
+            print(desc_list)
             aspect_file.write('Aspect %d:\n' % ind)
             aspect_file.write(' '.join(desc_list) + '\n\n')
 
