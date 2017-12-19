@@ -42,6 +42,7 @@ One example of trained model for the restaurant domain has been put in pre_train
 * keras 1.2.1
 * theano 0.9.0
 * numpy 1.13.3
+* python 2
 
 ## Cite
 If you use the code, please cite the following paper:
