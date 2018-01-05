@@ -4,3 +4,4 @@ include/*
 dataset/*
 .DS_Store
 .idea/*
+preprocess_data/*
