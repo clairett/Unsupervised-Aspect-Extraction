@@ -41,37 +41,17 @@ def preprocess_test(domain):
             out1.write(' '.join(tokens) + '\n')
             out2.write(label+'\n')
 
-def preprocess_csv(domain):
-    f = open('../dataset/'+domain+'.csv', 'r')
-    if not os.path.exists('../preprocessed_data/' + domain):
-        os.mkdir('../preprocessed_data/' + domain)
-    out = codecs.open('../preprocessed_data/' + domain + '/train.txt', 'w', 'utf-8')
-    sentences = []
-    spamreader = csv.DictReader(f)
-    count = 1
-    for row in spamreader:
-        if count > 2:
-            if row['Q2'] != "":
-                tokens = parseSentence(row['Q2'])
-                if len(tokens) > 0:
-                    sentences.append(' '.join(tokens))
-
-        count += 1
-    out.write('\n'.join(sentences))
-
 def preprocess(domain):
     print '\t' + domain + ' set ...'
-    preprocess_csv(domain)
-    # print '\t'+domain+' train set ...'
-    # preprocess_train(domain)
-    # print '\t'+domain+' test set ...'
-    # preprocess_test(domain)
+    print '\t'+domain+' train set ...'
+    preprocess_train(domain)
+    print '\t'+domain+' test set ...'
+    preprocess_test(domain)
 
 
 
 print 'Preprocessing raw review sentences ...'
 # preprocess('restaurant')
 # preprocess('beer')
-preprocess('mobile')
 
 
