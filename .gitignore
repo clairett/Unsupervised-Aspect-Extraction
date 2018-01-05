@@ -4,4 +4,6 @@ include/*
 dataset/*
 .DS_Store
 .idea/*
-preprocess_data/*
+preprocessed_data/*
+pip-selfcheck.json
+.Python
