@@ -1,8 +1,7 @@
-KERAS_BACKEND=theano THEANO_FLAGS="device=cpu,floatX=float32" python2.7 train.py \
---vocab-size 1600 \
---emb ../preprocessed_data/mobile/w2v_embedding \
---domain mobile \
---epochs 10 \
---aspect-size 10 \
--o output_dir \
-
+KERAS_BACKEND=tensorflow python train.py \
+--emb /Users/tian/Documents/aspect-extraction/aspect-extraction/dataset/GoogleNews-vectors-negative300.bin \
+--embdim 300 \
+--domain restaurant \
+--epochs 30 \
+--batch-size 50 \
+-o output

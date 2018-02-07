@@ -7,3 +7,5 @@ dataset/*
 preprocessed_data/*
 pip-selfcheck.json
 .Python
+code/*.pyc
+code/__pycache__

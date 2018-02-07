@@ -1,10 +1,9 @@
 import keras.backend as K
 from keras.engine.topology import Layer
-from keras import initializations
+from keras import initializers as initializations
 from keras import regularizers
 from keras import constraints
 import numpy as np
-import theano.tensor as T
 
 class Attention(Layer):
     def __init__(self, W_regularizer=None, b_regularizer=None,
@@ -53,7 +52,7 @@ class Attention(Layer):
         mask = mask[0]
 
         y = K.transpose(K.dot(self.W, K.transpose(y)))
-        y = K.expand_dims(y, dim=-2)
+        y = K.expand_dims(y, axis=-2)
         y = K.repeat_elements(y, self.steps, axis=1)
         eij = K.sum(x*y, axis=-1)
 
@@ -70,8 +69,9 @@ class Attention(Layer):
         a /= K.cast(K.sum(a, axis=1, keepdims=True) + K.epsilon(), K.floatx())
         return a
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return (input_shape[0][0], input_shape[0][1])
+
 
 class WeightedSum(Layer):
     def __init__(self, **kwargs):
@@ -90,17 +90,18 @@ class WeightedSum(Layer):
 
         return K.sum(weighted_input, axis=1)
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return (input_shape[0][0], input_shape[0][-1])
 
     def compute_mask(self, x, mask=None):
         return None
 
+
 class WeightedAspectEmb(Layer):
     def __init__(self, input_dim, output_dim,
                  init='uniform', input_length=None,
-                 W_regularizer=None, activity_regularizer=None,
-                 W_constraint=None,
+                 embeddings_regularizer=None, activity_regularizer=None,
+                 embeddings_constraint=None,
                  weights=None, dropout=0., **kwargs):
         self.input_dim = input_dim
         self.output_dim = output_dim
@@ -108,8 +109,8 @@ class WeightedAspectEmb(Layer):
         self.input_length = input_length
         self.dropout = dropout
 
-        self.W_constraint = constraints.get(W_constraint)
-        self.W_regularizer = regularizers.get(W_regularizer)
+        self.embeddings_constraint = constraints.get(embeddings_constraint)
+        self.embeddings_regularizer = regularizers.get(embeddings_regularizer)
         self.activity_regularizer = regularizers.get(activity_regularizer)
 
         if 0. < self.dropout < 1.:
@@ -120,11 +121,11 @@ class WeightedAspectEmb(Layer):
         super(WeightedAspectEmb, self).__init__(**kwargs)
 
     def build(self, input_shape):
-        self.W = self.add_weight((self.input_dim, self.output_dim),
+        self.embeddings = self.add_weight((self.input_dim, self.output_dim),
                                  initializer=self.init,
-                                 name='{}_W'.format(self.name),
-                                 regularizer=self.W_regularizer,
-                                 constraint=self.W_constraint)
+                                 name='{}_embeddings'.format(self.name),
+                                 regularizer=self.embeddings_regularizer,
+                                 constraint=self.embeddings_constraint)
 
         if self.initial_weights is not None:
             self.set_weights(self.initial_weights)
@@ -133,11 +134,11 @@ class WeightedAspectEmb(Layer):
     def compute_mask(self, x, mask=None):
         return None
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return (input_shape[0], self.output_dim)
 
     def call(self, x, mask=None):
-        return K.dot(x, self.W)
+        return K.dot(x, self.embeddings)
 
 
 class Average(Layer):
@@ -152,9 +153,9 @@ class Average(Layer):
             x = x * mask
         return K.sum(x, axis=-2) / K.sum(mask, axis=-2)
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return input_shape[0:-2]+input_shape[-1:]
-    
+
     def compute_mask(self, x, mask=None):
         return None
 
@@ -164,7 +165,7 @@ class MaxMargin(Layer):
         super(MaxMargin, self).__init__(**kwargs)
 
     def call(self, input_tensor, mask=None):
-        z_s = input_tensor[0] 
+        z_s = input_tensor[0]
         z_n = input_tensor[1]
         r_s = input_tensor[2]
 
@@ -176,20 +177,15 @@ class MaxMargin(Layer):
 
         pos = K.sum(z_s*r_s, axis=-1, keepdims=True)
         pos = K.repeat_elements(pos, steps, axis=-1)
-        r_s = K.expand_dims(r_s, dim=-2)
+        r_s = K.expand_dims(r_s, axis=-2)
         r_s = K.repeat_elements(r_s, steps, axis=1)
         neg = K.sum(z_n*r_s, axis=-1)
 
-        loss = K.cast(K.sum(T.maximum(0., (1. - pos + neg)), axis=-1, keepdims=True), K.floatx())
+        loss = K.cast(K.sum(K.maximum(0., (1. - pos + neg)), axis=-1, keepdims=True), K.floatx())
         return loss
 
     def compute_mask(self, input_tensor, mask=None):
         return None
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return (input_shape[0][0], 1)
-
-
-
-
-        

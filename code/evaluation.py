@@ -40,7 +40,7 @@ test_x = sequence.pad_sequences(test_x, maxlen=overall_maxlen)
 
 
 ############# Build model architecture, same as the model used for training #########
-from model import create_model
+from code import create_model
 import keras.backend as K
 from optimizers import get_optimizer
 
